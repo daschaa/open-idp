@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -20,11 +21,10 @@ type TokenRequest struct {
 	GrantType    string `json:"grant_type"`
 }
 
-var signingKey = []byte("your_secret_key")
-
 type IdpServer struct {
 	clientRepository repository.ClientRepository
 	clock            repository.Clock
+	signingKey       []byte
 }
 
 func (s *IdpServer) ValidateClient(clientId string, clientSecret string) (bool, error) {
@@ -49,14 +49,31 @@ func (s *IdpServer) introspect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	claims := jwt.MapClaims{}
-	_, err = jwt.ParseWithClaims(*request.Token, claims, func(token *jwt.Token) (interface{}, error) {
-		return signingKey, nil
+	token, err := jwt.ParseWithClaims(*request.Token, claims, func(token *jwt.Token) (interface{}, error) {
+		return s.signingKey, nil
 	})
+
+	if !token.Valid {
+		json.NewEncoder(w).Encode(map[string]interface{}{"active": false})
+		return
+	}
+
+	subject := claims["sub"]
+	client, err := s.clientRepository.GetClient(fmt.Sprintf("%s", subject))
+	if err != nil {
+		json.NewEncoder(w).Encode(map[string]interface{}{"active": false})
+		return
+	}
 
 	active := claims.VerifyExpiresAt(s.clock.Now().Unix(), true)
 
+	if !active {
+		json.NewEncoder(w).Encode(map[string]interface{}{"active": active})
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(map[string]interface{}{"active": active})
+	err = json.NewEncoder(w).Encode(map[string]interface{}{"active": active, "sub": client.ClientId})
 }
 
 func (s *IdpServer) token(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +101,7 @@ func (s *IdpServer) token(w http.ResponseWriter, r *http.Request) {
 		"sub":   request.ClientId,
 		"exp":   s.clock.Now().Add(time.Hour).Unix(),
 		"scope": "read:example",
-	}).SignedString(signingKey)
+	}).SignedString(s.signingKey)
 
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(map[string]string{"access_token": token, "token_type": "Bearer", "expires_in": "3600"})
@@ -94,11 +111,12 @@ func (s *IdpServer) token(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func InitIdpApi(r repository.ClientRepository, clock repository.Clock) http.Handler {
+func InitIdpApi(r repository.ClientRepository, clock repository.Clock, signingKey []byte) http.Handler {
 	router := mux.NewRouter()
 	server := IdpServer{
 		clientRepository: r,
 		clock:            clock,
+		signingKey:       signingKey,
 	}
 	router.HandleFunc("/token", server.token)
 	router.HandleFunc("/introspect", server.introspect)

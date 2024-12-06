@@ -23,7 +23,9 @@ func main() {
 
 	clock := SystemClock{}
 
-	router := idp_server.InitIdpApi(clientRepository, clock)
+	signingKey := []byte("your_secret_key")
+
+	router := idp_server.InitIdpApi(clientRepository, clock, signingKey)
 	if err := http.ListenAndServe(":8080", router); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
