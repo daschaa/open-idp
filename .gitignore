@@ -1,0 +1,6 @@
+build
+.DS_Store
+.idea
+docker/dynamodb
+cmd/local/server.crt
+cmd/local/server.key
