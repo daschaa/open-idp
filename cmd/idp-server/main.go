@@ -17,8 +17,9 @@ func (c SystemClock) Now() time.Time {
 func main() {
 	clientRepository := repository.NewDynamoDbClientRepository(repository.NewDynamoDbClient())
 	clock := SystemClock{}
+	signingKey := []byte("your_secret_key")
 
-	router := idp_server.InitIdpApi(clientRepository, clock)
+	router := idp_server.InitIdpApi(clientRepository, clock, signingKey)
 	if err := http.ListenAndServe(":8080", router); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
