@@ -4,3 +4,4 @@ build
 docker/dynamodb
 cmd/local/server.crt
 cmd/local/server.key
+LOCAL_SETUP.md

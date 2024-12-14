@@ -1,6 +1,10 @@
-version: '3'
+version: "3"
 
 tasks:
   build:
     desc: build project
-    cmds: [ go build -o build/idp-server/server cmd/idp-server/main.go ]
+    cmds: [go build -o build/idp-server/server cmd/idp-server/main.go]
+  test:
+    desc: test project
+    cmds: [go test ./...]
+
