@@ -1,7 +1,7 @@
 package main
 
 import (
-	"net/http"
+	"fmt"
 	"open-idp/internal/repository"
 	idp_server "open-idp/internal/server"
 	"time"
@@ -17,11 +17,12 @@ func (c SystemClock) Now() time.Time {
 }
 
 func main() {
+	fmt.Println("Starting IDP server")
 	clientRepository := repository.NewDynamoDbClientRepository(repository.NewDynamoDbClient())
 	clock := SystemClock{}
 	signingKey := []byte("your_secret_key")
 
-	idp_server.InitIdpApi(clientRepository, clock, signingKey)
+	api := idp_server.InitIdpApi(clientRepository, clock, signingKey)
 
-	lambda.Start(httpadapter.New(http.DefaultServeMux).ProxyWithContext)
+	lambda.Start(httpadapter.NewV2(api).ProxyWithContext)
 }

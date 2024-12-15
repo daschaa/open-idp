@@ -79,7 +79,7 @@ func NewDynamoDbClientRepository(client *dynamodb.Client) *DynamoDbClientReposit
 
 func NewDynamoDbClient() *dynamodb.Client {
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithRegion("eu-west-1"),
+		config.WithRegion("us-east-1"),
 	)
 	if err != nil {
 		panic(err)

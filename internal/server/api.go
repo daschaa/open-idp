@@ -77,6 +77,7 @@ func (s *IdpServer) introspect(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *IdpServer) token(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("token will be generated")
 	request := TokenRequest{}
 	err := json.NewDecoder(r.Body).Decode(&request)
 
