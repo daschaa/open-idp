@@ -1,5 +1,5 @@
 import {GoFunction} from "@aws-cdk/aws-lambda-go-alpha";
-import {RemovalPolicy, Stack, StackProps} from "aws-cdk-lib";
+import {CfnOutput, RemovalPolicy, Stack, StackProps} from "aws-cdk-lib";
 import {Key, KeySpec, KeyUsage} from "aws-cdk-lib/aws-kms";
 import {Construct} from "constructs";
 import {HttpApi, HttpMethod} from "aws-cdk-lib/aws-apigatewayv2";
@@ -41,6 +41,11 @@ export class AppStack extends Stack {
             path: '/introspect',
             methods: [HttpMethod.POST],
             integration: new HttpLambdaIntegration('Integration', fn)
+        });
+        new CfnOutput(this, 'ApiUrl', {
+            value: httpApi.apiEndpoint,
+            key: 'ApiUrl',
+            description: 'The URL of the API',
         });
     }
 }
