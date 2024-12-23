@@ -1,10 +1,11 @@
 package main
 
 import (
+	idp "github.com/daschaa/open-idp/internal/idp"
+	"github.com/daschaa/open-idp/internal/repository"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"open-idp/internal/repository"
-	idp_server "open-idp/internal/server"
 	"time"
 )
 
@@ -21,11 +22,13 @@ func main() {
 		log.Fatalf("Failed to save client: %v", err)
 	}
 
-	clock := SystemClock{}
-
 	signingKey := []byte("your_secret_key")
 
-	router := idp_server.InitIdpApi(clientRepository, clock, signingKey)
+	router := mux.NewRouter()
+	server := idp.New(clientRepository, idp.WithSigningKey(&signingKey))
+	router.HandleFunc("/token", server.TokenHandler)
+	router.HandleFunc("/introspect", server.IntrospectHandler)
+
 	if err := http.ListenAndServe(":8080", router); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}

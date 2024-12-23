@@ -23,14 +23,14 @@ export class AppStack extends Stack {
             keyUsage: KeyUsage.GENERATE_VERIFY_MAC,
         });
         const fn = new GoFunction(this, "Function", {
-            entry: __dirname + "/../../cmd/idp-server/main.go",
+            entry: __dirname + "/../../cmd/idp-idp/main.go",
             moduleDir: __dirname + "/../../go.mod",
-            functionName: "idp-server",
+            functionName: "idp-idp",
         });
         table.grantFullAccess(fn);
         const httpApi = new HttpApi(this, 'HttpApi', {
-            apiName: 'idp-server',
-            description: 'This is the API for the IDP server',
+            apiName: 'idp-idp',
+            description: 'This is the API for the IDP idp',
         });
         httpApi.addRoutes({
             path: '/token',
