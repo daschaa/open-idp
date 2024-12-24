@@ -7,7 +7,3 @@ tasks:
   test:
     desc: test project
     cmds: [go test ./...]
-    deps: [setup-local-db]
-  setup-local-db:
-    desc: run docker-compose
-    cmds: [docker-compose -f docker/docker-compose.yml up -d]
