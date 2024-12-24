@@ -7,4 +7,3 @@ tasks:
   test:
     desc: test project
     cmds: [go test ./...]
-
