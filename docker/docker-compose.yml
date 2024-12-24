@@ -9,3 +9,13 @@ services:
     volumes:
       - "./dynamodb:/home/dynamodblocal/data"
     working_dir: /home/dynamodblocal
+    entrypoint: >
+      sh -c "
+        aws dynamodb create-table \
+          --table-name clients \
+          --attribute-definitions AttributeName=clientId,AttributeType=S \
+          --key-schema AttributeName=clientId,KeyType=HASH \
+          --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+          --endpoint-url http://localhost:8000
+        wait
+      "
