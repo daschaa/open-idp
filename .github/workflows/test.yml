@@ -21,5 +21,13 @@ jobs:
         with:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create DynamoDB table
+        run: |
+          aws dynamodb create-table \
+            --table-name clients \
+            --attribute-definitions AttributeName=clientId,AttributeType=S \
+            --key-schema AttributeName=clientId,KeyType=HASH \
+            --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+            --endpoint-url http://localhost:8000
       - name: Run tests
         run: task test
