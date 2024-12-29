@@ -21,6 +21,11 @@ jobs:
         with:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set AWS credentials
+        run: |
+          export AWS_ACCESS_KEY_ID="DUMMYIDEXAMPLE"
+          export AWS_SECRET_ACCESS_KEY="DUMMYEXAMPLEKEY"
+          export AWS_SESSION_TOKEN="dummy"
       - name: Create DynamoDB table
         run: |
           aws dynamodb create-table \
