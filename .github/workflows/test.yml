@@ -24,6 +24,7 @@ jobs:
       - name: Create DynamoDB table
         run: |
           aws dynamodb create-table \
+            --region eu-west-1 \
             --table-name clients \
             --attribute-definitions AttributeName=clientId,AttributeType=S \
             --key-schema AttributeName=clientId,KeyType=HASH \
