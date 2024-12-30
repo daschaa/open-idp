@@ -26,6 +26,7 @@ jobs:
           export AWS_ACCESS_KEY_ID="DUMMYIDEXAMPLE"
           export AWS_SECRET_ACCESS_KEY="DUMMYEXAMPLEKEY"
           export AWS_SESSION_TOKEN="dummy"
+          ./docker/wait-for-db.sh
           aws dynamodb create-table \
             --region eu-west-1 \
             --table-name clients \
