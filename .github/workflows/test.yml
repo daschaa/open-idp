@@ -7,6 +7,12 @@ on:
   pull_request:
     branches:
       - main
+env:
+  AWS_REGION: eu-west-1
+  AWS_DEFAULT_REGION: eu-west-1
+  AWS_ACCESS_KEY_ID: DUMMYIDEXAMPLE
+  AWS_SECRET_ACCESS_KEY: DUMMYEXAMPLEKEY
+  AWS_SESSION_TOKEN: dummy
 
 jobs:
   test:
@@ -25,10 +31,6 @@ jobs:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Create DynamoDB table
-        env:
-          AWS_ACCESS_KEY_ID: DUMMYIDEXAMPLE
-          AWS_SECRET_ACCESS_KEY: DUMMYEXAMPLEKEY
-          AWS_SESSION_TOKEN: dummy
         run: |
           ./docker/wait-for-db.sh
           aws dynamodb create-table \
@@ -40,8 +42,4 @@ jobs:
             --endpoint-url http://localhost:8000 \
             --no-cli-pager
       - name: Run tests
-        env:
-          AWS_ACCESS_KEY_ID: DUMMYIDEXAMPLE
-          AWS_SECRET_ACCESS_KEY: DUMMYEXAMPLEKEY
-          AWS_SESSION_TOKEN: dummy
         run: task test
