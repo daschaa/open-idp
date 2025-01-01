@@ -11,21 +11,25 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      dynamodb:
+        image: amazon/dynamodb-local
+        ports:
+          - 8000:8000
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
-      - name: Run docker-compose
-        run: docker compose -f docker/docker-compose.yml up -d
       - name: Install Task
         uses: arduino/setup-task@v2
         with:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Create DynamoDB table
+        env:
+          AWS_ACCESS_KEY_ID: DUMMYIDEXAMPLE
+          AWS_SECRET_ACCESS_KEY: DUMMYEXAMPLEKEY
+          AWS_SESSION_TOKEN: dummy
         run: |
-          export AWS_ACCESS_KEY_ID="DUMMYIDEXAMPLE"
-          export AWS_SECRET_ACCESS_KEY="DUMMYEXAMPLEKEY"
-          export AWS_SESSION_TOKEN="dummy"
           ./docker/wait-for-db.sh
           aws dynamodb create-table \
             --region eu-west-1 \
@@ -36,4 +40,8 @@ jobs:
             --endpoint-url http://localhost:8000 \
             --no-cli-pager
       - name: Run tests
+        env:
+          AWS_ACCESS_KEY_ID: DUMMYIDEXAMPLE
+          AWS_SECRET_ACCESS_KEY: DUMMYEXAMPLEKEY
+          AWS_SESSION_TOKEN: dummy
         run: task test
