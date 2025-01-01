@@ -1,0 +1,51 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+env:
+  AWS_REGION: eu-west-1
+  AWS_DEFAULT_REGION: eu-west-1
+  AWS_ACCESS_KEY_ID: DUMMYIDEXAMPLE
+  AWS_SECRET_ACCESS_KEY: DUMMYEXAMPLEKEY
+  AWS_SESSION_TOKEN: dummy
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      dynamodb:
+        image: amazon/dynamodb-local
+        ports:
+          - 8000:8000
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create DynamoDB table
+        run: |
+          ./docker/wait-for-db.sh
+          aws dynamodb create-table \
+            --region eu-west-1 \
+            --table-name clients \
+            --attribute-definitions AttributeName=clientId,AttributeType=S \
+            --key-schema AttributeName=clientId,KeyType=HASH \
+            --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+            --endpoint-url http://localhost:8000 \
+            --no-cli-pager
+      - name: Set up gotestfmt
+        uses: gotesttools/gotestfmt-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run tests
+        run: |
+          set -euo pipefail
+          go test -json -v ./... 2>&1 | tee /tmp/gotest.log | gotestfmt

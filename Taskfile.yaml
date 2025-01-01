@@ -6,5 +6,4 @@ tasks:
     cmds: [go build -o build/server/idp-server cmd/server/main.go]
   test:
     desc: test project
-    cmds: [go test ./...]
-
+    cmds: [go test -v ./...]
